@@ -37,70 +37,19 @@ namespace json_parser
                 }
                 else if (c == '"')
                 {
-                    lastToken = "[STRING_START]";
-                    Console.WriteLine(lastToken);
-                    for (int j = i + 1; j < jsonInput.Length; j++)
-                    {
-                        char c2 = jsonInput[j];
-                        if (c2 == '"')
-                        {
-                            lastToken = "[STRING_END]";
-                            Console.WriteLine(lastToken);
-                            i = j;
-                            break;
-                        }
-                    }
+                    i = ProcessStringState(jsonInput, i, out lastToken);
                 }
                 else if ((c == 'n') && lastToken == "[COLON]")
                 {
-                    lastToken = "[NULL_START]";
-                    Console.WriteLine(lastToken);
-
-                    for (int j = i + 1; j < jsonInput.Length; j++)
-                    {
-                        char c2 = jsonInput[j];
-                        if (c2 == 'l')
-                        {
-                            lastToken = "[NULL_END]";
-                            Console.WriteLine(lastToken);
-                            i = j;
-                            break;
-                        }
-                    }
+                    i = ProcessNullState(jsonInput, i, out lastToken);
                 }
                 else if ((c == 'f' || c == 't') && lastToken == "[COLON]")
                 {
-                    lastToken = "[BOOLEAN_START]";
-                    Console.WriteLine(lastToken);
-
-                    for (int j = i + 1; j < jsonInput.Length; j++)
-                    {
-                        char c2 = jsonInput[j];
-                        if (c2 == 'e')
-                        {
-                            lastToken = "[BOOLEAN_END]";
-                            Console.WriteLine(lastToken);
-                            i = j;
-                            break;
-                        }
-                    }
+                    i = ProcessBooleanState(jsonInput, i, out lastToken);
                 }
-                else if (numbers.Contains(c))
+                else if (numbers.Contains(c) && lastToken == "[COLON]")
                 {
-                    lastToken="[NUMBER_START]";
-                    Console.WriteLine(lastToken);
-
-                    for (int j = i + 1; j < jsonInput.Length; j++)
-                    {
-                        char c2 = jsonInput[j];
-                        if (c2 == ',' || c2 == '}')
-                        {
-                            lastToken = "[NUMBER_END]";
-                            Console.WriteLine(lastToken);
-                            i = j;
-                            break;
-                        }
-                    }
+                    i = ProcessNumberState(jsonInput, i, out lastToken);
                 }
                 else if (c == '[')
                 {
@@ -133,36 +82,11 @@ namespace json_parser
                         }
                         else if (c2 == '"')
                         {
-                            lastToken = "[STRING_START]";
-                            Console.WriteLine(lastToken);
-                            for (int k = j + 1; k < jsonInput.Length; k++)
-                            {
-                                char c3 = jsonInput[k];
-                                if (c3 == '"')
-                                {
-                                    lastToken = "[STRING_END]";
-                                    Console.WriteLine(lastToken);
-                                    j = k;
-                                    break;
-                                }
-                            }
+                            j = ProcessStringState(jsonInput, j, out lastToken);
                         }
                         else if (numbers.Contains(c2))
                         {
-                            lastToken="[NUMBER_START]";
-                            Console.WriteLine(lastToken);
-
-                            for (int k = j + 1; k < jsonInput.Length; k++)
-                            {
-                                char c3 = jsonInput[k];
-                                if (c3 == ',' || c3 == '}')
-                                {
-                                    lastToken = "[NUMBER_END]";
-                                    Console.WriteLine(lastToken);
-                                    j = k;
-                                    break;
-                                }
-                            }
+                            j = ProcessNumberState(jsonInput, j, out lastToken);
                         }
                     }
                 }
@@ -179,6 +103,79 @@ namespace json_parser
             }
 
             Console.ReadLine();
+        }
+
+        static int ProcessNumberState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken="[NUMBER_START]";
+            Console.WriteLine(lastToken);
+
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c2 = jsonInput[j];
+                if (c2 == ',' || c2 == '}')
+                {
+                    lastToken = "[NUMBER_END]";
+                    Console.WriteLine(lastToken);
+                    return j;
+                }
+            }
+            return jsonInput.Length;
+        }
+
+        static int ProcessBooleanState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken = "[BOOLEAN_START]";
+            Console.WriteLine(lastToken);
+
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c2 = jsonInput[j];
+                if (c2 == 'e')
+                {
+                    lastToken = "[BOOLEAN_END]";
+                    Console.WriteLine(lastToken);
+                    return j;
+                }
+            }
+            return jsonInput.Length;
+        }
+
+        static int ProcessNullState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken = "[NULL_START]";
+            Console.WriteLine(lastToken);
+
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c2 = jsonInput[j];
+                if (c2 == 'l')
+                {
+                    lastToken = "[NULL_END]";
+                    Console.WriteLine(lastToken);
+                    return j;
+                }
+            }
+
+            return jsonInput.Length;
+        }
+
+        static int ProcessStringState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken = "[STRING_START]";
+            Console.WriteLine(lastToken);
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c2 = jsonInput[j];
+                if (c2 == '"')
+                {
+                    lastToken = "[STRING_END]";
+                    Console.WriteLine(lastToken);
+                    return j;
+                }
+            }
+
+            return jsonInput.Length;
         }
     }
 }
