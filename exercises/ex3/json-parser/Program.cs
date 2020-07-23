@@ -13,32 +13,56 @@ namespace json_parser
             // Value => "test" | 123 | 23.2 | {} | [] | true | false | null
 
             //string jsonInput = "{\"menu\": {\"id\": \"file\",\"value\": \"File\",\"popup\": {\"menuitem\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},{\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},{\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}]}}}";
-            string jsonInput = "{\"widget\": {\"debug\": false,\"window\": {\"title\": \"Sample Konfabulator Widget\",\"name\": \"main_window\",\"width\": 500,\"height\": 500},\"image\": { \"src\": \"Images/Sun.png\",\"name\": \"sun1\",\"hOffset\": 250,        \"vOffset\": 250,        \"alignment\": \"center\"    },    \"text\": {        \"data\": \"Click Here\",        \"size\": 36,        \"style\": \"bold\",        \"name\": \"text1\",        \"hOffset\": 250,        \"vOffset\": 100,        \"alignment\": \"center\",        \"onMouseUp\": \"sun1.opacity = (sun1.opacity / 100) * 90;\"    }}}    ";
+            string jsonInput = "{\"widget\": {\"debug\": false, \"listOfStuff\":[123, 123.44, \"test\", {}],\"window\": { \"fullscreen\": true, \"title\": \"Sample Konfabulator Widget\",\"name\": \"main_window\",\"width\": 500,\"height\": 500},\"image\": { \"src\": \"Images/Sun.png\",\"name\": \"sun1\",\"hOffset\": 250,        \"vOffset\": 250,        \"alignment\": \"center\"    },    \"text\": {        \"data\": \"Click Here\",        \"size\": 36,        \"style\": \"bold\",        \"name\": \"text1\",        \"hOffset\": 250,        \"vOffset\": 100,        \"alignment\": \"center\",        \"onMouseUp\": \"sun1.opacity = (sun1.opacity / 100) * 90;\"    }}}    ";
             string tmp = string.Empty;
             string numbers = "0123456789";
+            string lastToken = string.Empty;
 
             // use a while loop instead
+            // to get n-number of nested objects/arrays etc need to use recursion.
+            
             for (int i = 0; i < jsonInput.Length; i++)
             {
                 char c = jsonInput[i];
 
                 if (c == '{')
                 {
-                    Console.WriteLine("[OBJECT_START]");
+                    lastToken = "[OBJECT_START]";
+                    Console.WriteLine(lastToken);
                 }
                 else if (c == '}')
                 {
-                    Console.WriteLine("[OBJECT_END]");
+                    lastToken = "[OBJECT_END]";
+                    Console.WriteLine(lastToken);
                 }
                 else if (c == '"')
                 {
-                    Console.WriteLine("[STRING_START]");
+                    lastToken = "[STRING_START]";
+                    Console.WriteLine(lastToken);
                     for (int j = i + 1; j < jsonInput.Length; j++)
                     {
                         char c2 = jsonInput[j];
                         if (c2 == '"')
                         {
-                            Console.WriteLine("[STRING_END]");
+                            lastToken = "[STRING_END]";
+                            Console.WriteLine(lastToken);
+                            i = j;
+                            break;
+                        }
+                    }
+                }
+                else if ((c == 'f' || c == 't') && lastToken == "[COLON]")
+                {
+                    lastToken = "[BOOLEAN_START]";
+                    Console.WriteLine(lastToken);
+
+                    for (int j = i + 1; j < jsonInput.Length; j++)
+                    {
+                        char c2 = jsonInput[j];
+                        if (c2 == 'e')
+                        {
+                            lastToken = "[BOOLEAN_END]";
+                            Console.WriteLine(lastToken);
                             i = j;
                             break;
                         }
@@ -46,14 +70,16 @@ namespace json_parser
                 }
                 else if (numbers.Contains(c))
                 {
-                    Console.WriteLine("[NUMBER_START]");
+                    lastToken="[NUMBER_START]";
+                    Console.WriteLine(lastToken);
 
                     for (int j = i + 1; j < jsonInput.Length; j++)
                     {
                         char c2 = jsonInput[j];
                         if (c2 == ',' || c2 == '}')
                         {
-                            Console.WriteLine("[NUMBER_END]");
+                            lastToken = "[NUMBER_END]";
+                            Console.WriteLine(lastToken);
                             i = j;
                             break;
                         }
@@ -61,37 +87,61 @@ namespace json_parser
                 }
                 else if (c == '[')
                 {
-                    Console.WriteLine("[ARRAY_START]");
+                    lastToken = "[ARRAY_START]";
+                    Console.WriteLine(lastToken);
                     for (int j = i + 1; j < jsonInput.Length; j++)
                     {
                         char c2 = jsonInput[j];
                         if (c2 == ']')
                         {
-                            Console.WriteLine("[ARRAY_END]");
+                            lastToken = "[ARRAY_END]";
+                            Console.WriteLine(lastToken);
                             i = j;
                             break;
                         }
                         else if (c2 == '{')
                         {
-                            Console.WriteLine("[OBJECT_START]");
+                            lastToken = "[OBJECT_START]";
+                            Console.WriteLine(lastToken);
                         }
                         else if (c2 == '}')
                         {
-                            Console.WriteLine("[OBJECT_END]");
+                            lastToken = "[OBJECT_END]";
+                            Console.WriteLine(lastToken);
                         }
                         else if (c2 == ',')
                         {
-                            Console.WriteLine("[SEPERATOR]");
+                            lastToken = "[SEPERATOR]";
+                            Console.WriteLine(lastToken);
                         }
                         else if (c2 == '"')
                         {
-                            Console.WriteLine("[STRING_START]");
+                            lastToken = "[STRING_START]";
+                            Console.WriteLine(lastToken);
                             for (int k = j + 1; k < jsonInput.Length; k++)
                             {
                                 char c3 = jsonInput[k];
                                 if (c3 == '"')
                                 {
-                                    Console.WriteLine("[STRING_END]");
+                                    lastToken = "[STRING_END]";
+                                    Console.WriteLine(lastToken);
+                                    j = k;
+                                    break;
+                                }
+                            }
+                        }
+                        else if (numbers.Contains(c2))
+                        {
+                            lastToken="[NUMBER_START]";
+                            Console.WriteLine(lastToken);
+
+                            for (int k = j + 1; k < jsonInput.Length; k++)
+                            {
+                                char c3 = jsonInput[k];
+                                if (c3 == ',' || c3 == '}')
+                                {
+                                    lastToken = "[NUMBER_END]";
+                                    Console.WriteLine(lastToken);
                                     j = k;
                                     break;
                                 }
@@ -101,11 +151,13 @@ namespace json_parser
                 }
                 else if (c == ',')
                 {
-                    Console.WriteLine("[SEPERATOR]");
+                    lastToken = "[SEPERATOR]";
+                    Console.WriteLine(lastToken);
                 }
                 else if (c == ':')
                 {
-                    Console.WriteLine("[COLON]");
+                    lastToken = "[COLON]";
+                    Console.WriteLine(lastToken);
                 }
             }
 
