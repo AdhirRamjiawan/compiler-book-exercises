@@ -9,18 +9,15 @@ namespace json_parser
 
         static void Main(string[] args)
         {
-            //Regex r = new Regex("sdfsdf");
-            // Objects => {}, {"age": 23 }
-            // Arrays => [ {} , "", ...]
-            // Value => "test" | 123 | 23.2 | {} | [] | true | false | null
-
-            //string jsonInput = "{\"menu\": {\"id\": \"file\",\"value\": \"File\",\"popup\": {\"menuitem\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},{\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},{\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}]}}}";
             string jsonInput = "{\"widget\": {\"handle\":null, \"debug\": false, \"listOfStuff\":[123, 123.44, \"test\", {}],\"window\": { \"fullscreen\": true, \"title\": \"Sample Konfabulator Widget\",\"name\": \"main_window\",\"width\": 500,\"height\": 500},\"image\": { \"src\": \"Images/Sun.png\",\"name\": \"sun1\",\"hOffset\": 250,        \"vOffset\": 250,        \"alignment\": \"center\"    },    \"text\": {        \"data\": \"Click Here\",        \"size\": 36,        \"style\": \"bold\",        \"name\": \"text1\",        \"hOffset\": 250,        \"vOffset\": 100,        \"alignment\": \"center\",        \"onMouseUp\": \"sun1.opacity = (sun1.opacity / 100) * 90;\"    }}}    ";
-            string tmp = string.Empty;
             
             string lastToken = string.Empty;
 
-            // use a while loop instead
+            ProcessRootState(jsonInput, out lastToken);
+        }
+
+        static void ProcessRootState(string jsonInput, out string lastToken)
+        {
             for (int i = 0; i < jsonInput.Length; i++)
             {
                 char c = jsonInput[i];
@@ -35,6 +32,7 @@ namespace json_parser
                 }
             }
 
+            lastToken = "[END]";
         }
 
         static int ProcessObjectState(string jsonInput, int i, out string lastToken)
