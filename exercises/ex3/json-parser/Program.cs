@@ -5,6 +5,8 @@ namespace json_parser
 {
     class Program
     {
+        const string numbers = "0123456789";
+
         static void Main(string[] args)
         {
             //Regex r = new Regex("sdfsdf");
@@ -15,7 +17,7 @@ namespace json_parser
             //string jsonInput = "{\"menu\": {\"id\": \"file\",\"value\": \"File\",\"popup\": {\"menuitem\": [{\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},{\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},{\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}]}}}";
             string jsonInput = "{\"widget\": {\"handle\":null, \"debug\": false, \"listOfStuff\":[123, 123.44, \"test\", {}],\"window\": { \"fullscreen\": true, \"title\": \"Sample Konfabulator Widget\",\"name\": \"main_window\",\"width\": 500,\"height\": 500},\"image\": { \"src\": \"Images/Sun.png\",\"name\": \"sun1\",\"hOffset\": 250,        \"vOffset\": 250,        \"alignment\": \"center\"    },    \"text\": {        \"data\": \"Click Here\",        \"size\": 36,        \"style\": \"bold\",        \"name\": \"text1\",        \"hOffset\": 250,        \"vOffset\": 100,        \"alignment\": \"center\",        \"onMouseUp\": \"sun1.opacity = (sun1.opacity / 100) * 90;\"    }}}    ";
             string tmp = string.Empty;
-            string numbers = "0123456789";
+            
             string lastToken = string.Empty;
 
             // use a while loop instead
@@ -53,42 +55,7 @@ namespace json_parser
                 }
                 else if (c == '[')
                 {
-                    lastToken = "[ARRAY_START]";
-                    Console.WriteLine(lastToken);
-                    for (int j = i + 1; j < jsonInput.Length; j++)
-                    {
-                        char c2 = jsonInput[j];
-                        if (c2 == ']')
-                        {
-                            lastToken = "[ARRAY_END]";
-                            Console.WriteLine(lastToken);
-                            i = j;
-                            break;
-                        }
-                        else if (c2 == '{')
-                        {
-                            lastToken = "[OBJECT_START]";
-                            Console.WriteLine(lastToken);
-                        }
-                        else if (c2 == '}')
-                        {
-                            lastToken = "[OBJECT_END]";
-                            Console.WriteLine(lastToken);
-                        }
-                        else if (c2 == ',')
-                        {
-                            lastToken = "[SEPERATOR]";
-                            Console.WriteLine(lastToken);
-                        }
-                        else if (c2 == '"')
-                        {
-                            j = ProcessStringState(jsonInput, j, out lastToken);
-                        }
-                        else if (numbers.Contains(c2))
-                        {
-                            j = ProcessNumberState(jsonInput, j, out lastToken);
-                        }
-                    }
+                    i = ProcessArrayState(jsonInput, i, out lastToken);
                 }
                 else if (c == ',')
                 {
@@ -103,6 +70,47 @@ namespace json_parser
             }
 
             Console.ReadLine();
+        }
+
+        static int ProcessArrayState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken = "[ARRAY_START]";
+            Console.WriteLine(lastToken);
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c2 = jsonInput[j];
+                if (c2 == ']')
+                {
+                    lastToken = "[ARRAY_END]";
+                    Console.WriteLine(lastToken);
+                    return j;
+                }
+                else if (c2 == '{')
+                {
+                    lastToken = "[OBJECT_START]";
+                    Console.WriteLine(lastToken);
+                }
+                else if (c2 == '}')
+                {
+                    lastToken = "[OBJECT_END]";
+                    Console.WriteLine(lastToken);
+                }
+                else if (c2 == ',')
+                {
+                    lastToken = "[SEPERATOR]";
+                    Console.WriteLine(lastToken);
+                }
+                else if (c2 == '"')
+                {
+                    j = ProcessStringState(jsonInput, j, out lastToken);
+                }
+                else if (numbers.Contains(c2))
+                {
+                    j = ProcessNumberState(jsonInput, j, out lastToken);
+                }
+            }
+
+            return jsonInput.Length;
         }
 
         static int ProcessNumberState(string jsonInput, int i, out string lastToken)
