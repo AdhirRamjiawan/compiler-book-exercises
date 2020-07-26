@@ -21,41 +21,57 @@ namespace json_parser
             string lastToken = string.Empty;
 
             // use a while loop instead
-            // to get n-number of nested objects/arrays etc need to use recursion.
-
             for (int i = 0; i < jsonInput.Length; i++)
             {
                 char c = jsonInput[i];
 
                 if (c == '{')
                 {
-                    lastToken = "[OBJECT_START]";
-                    Console.WriteLine(lastToken);
+                    i = ProcessObjectState(jsonInput, i, out lastToken);
+                } 
+                else if ( c == '[')
+                {
+                    i = ProcessArrayState(jsonInput, i, out lastToken);
                 }
-                else if (c == '}')
+            }
+
+        }
+
+        static int ProcessObjectState(string jsonInput, int i, out string lastToken)
+        {
+            lastToken = "[OBJECT_START]";
+            Console.WriteLine(lastToken);
+            for (int j = i + 1; j < jsonInput.Length; j++)
+            {
+                char c = jsonInput[j];
+
+                if (c == '{')
+                {
+                    j = ProcessObjectState(jsonInput, j, out lastToken);
+                } else if (c == '}')
                 {
                     lastToken = "[OBJECT_END]";
                     Console.WriteLine(lastToken);
                 }
                 else if (c == '"')
                 {
-                    i = ProcessStringState(jsonInput, i, out lastToken);
+                    j = ProcessStringState(jsonInput, j, out lastToken);
                 }
                 else if ((c == 'n') && lastToken == "[COLON]")
                 {
-                    i = ProcessNullState(jsonInput, i, out lastToken);
+                    j = ProcessNullState(jsonInput, j, out lastToken);
                 }
                 else if ((c == 'f' || c == 't') && lastToken == "[COLON]")
                 {
-                    i = ProcessBooleanState(jsonInput, i, out lastToken);
+                    j = ProcessBooleanState(jsonInput, j, out lastToken);
                 }
                 else if (numbers.Contains(c) && lastToken == "[COLON]")
                 {
-                    i = ProcessNumberState(jsonInput, i, out lastToken);
+                    j = ProcessNumberState(jsonInput, j, out lastToken);
                 }
                 else if (c == '[')
                 {
-                    i = ProcessArrayState(jsonInput, i, out lastToken);
+                    j = ProcessArrayState(jsonInput, j, out lastToken);
                 }
                 else if (c == ',')
                 {
@@ -69,7 +85,7 @@ namespace json_parser
                 }
             }
 
-            Console.ReadLine();
+            return jsonInput.Length;
         }
 
         static int ProcessArrayState(string jsonInput, int i, out string lastToken)
@@ -87,13 +103,7 @@ namespace json_parser
                 }
                 else if (c2 == '{')
                 {
-                    lastToken = "[OBJECT_START]";
-                    Console.WriteLine(lastToken);
-                }
-                else if (c2 == '}')
-                {
-                    lastToken = "[OBJECT_END]";
-                    Console.WriteLine(lastToken);
+                    j = ProcessObjectState(jsonInput, j, out lastToken);
                 }
                 else if (c2 == ',')
                 {
